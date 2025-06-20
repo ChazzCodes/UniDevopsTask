@@ -1,0 +1,39 @@
+# GitHub Actions workflow for running a basic Python CI pipeline
+
+name: Python App CI  # The name shown in the GitHub Actions tab
+
+# Trigger this workflow whenever a push is made to these branches
+on:
+  push:
+    branches:
+      - main    # Production branch
+      - test    # Staging/testing branch
+      - dev     # Development branch
+
+jobs:
+  setup-and-test:  # Name of the job (you can call this whatever you want)
+    runs-on: ubuntu-latest  # GitHub-hosted Linux machine to run the steps
+
+    # Use a GitHub Environment named after the branch (dev, test, or main)
+    environment: ${{ github.ref_name }}
+
+    steps:
+      # Check out your code from GitHub so the runner can access it
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python 3.11 on the runner
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Install Python dependencies from requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip        # Upgrade pip (best practice)
+          pip install -r requirements.txt            # Install required packages
+
+      # Run a placeholder check (can be replaced with real tests later)
+      - name: Run basic health check
+        run: echo "✅ Flask app installed successfully"
