@@ -31,7 +31,7 @@ jobs:
       # Install Python dependencies from requirements.txt
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip        # Upgrade pip (best practice)
+          python -m pip install --upgrade pip        # Upgrade pip 
           pip install -r requirements.txt            # Install required packages
 
       # Run a placeholder check (can be replaced with real tests later)
