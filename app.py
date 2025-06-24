@@ -1,20 +1,32 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, date
 import os
-from dotenv import load_dotenv  
+from dotenv import load_dotenv
 
-load_dotenv()  
+load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY') or 'fallbacksecret'
 
 # --- Database Configuration ---
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+
+# --- Flask-Login Setup ---
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'  # Redirect to login if not authenticated
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # --- Models ---
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -41,25 +53,56 @@ class Asset(db.Model):
 def home():
     return render_template("home.html")
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+
+        if user and bcrypt.check_password_hash(user.password_hash, password):
+            login_user(user)
+            flash('Login successful!')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid email or password.')
+            return redirect(url_for('login'))
+
     return render_template('login.html')
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+
+        if User.query.filter((User.username == username) | (User.email == email)).first():
+            flash('Username or email already exists.')
+            return redirect(url_for('register'))
+
+        hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
+        new_user = User(username=username, email=email, password_hash=hashed_pw)
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Registration successful! You can now log in.')
+        return redirect(url_for('login'))
+
     return render_template('register.html')
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
-    username = "Charlie"
-    role = "user"  # Change to "admin" to test admin view
-    return render_template('dashboard.html', username=username, role=role)
+    return render_template('dashboard.html', username=current_user.username, role=current_user.role)
 
 @app.route('/assets')
+@login_required
 def assets():
     return render_template('assets.html')
 
 @app.route('/assets/new', methods=['GET', 'POST'])
+@login_required
 def new_asset():
     today = date.today().isoformat()
 
@@ -76,9 +119,13 @@ def new_asset():
     return render_template('new_asset.html', today=today)
 
 @app.route('/users')
+@login_required
 def users():
     return render_template('users.html')
 
 @app.route('/logout')
+@login_required
 def logout():
-    return render_template('logout.html')
+    logout_user()
+    flash('You have been logged out.')
+    return redirect(url_for('login'))
