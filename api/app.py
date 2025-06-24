@@ -129,3 +129,6 @@ def logout():
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('login'))
+
+# Required for Vercel: expose 'app' as 'application' for WSGI
+application = app  # Vercel uses this if your file ends in .py and uses Flask
