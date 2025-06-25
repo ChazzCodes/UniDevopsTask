@@ -110,7 +110,8 @@ def dashboard():
 @app.route('/assets')
 @login_required
 def assets():
-    return render_template('assets.html')
+    user_assets = Asset.query.filter_by(user_id=current_user.id).all()
+    return render_template('assets.html', assets=user_assets)
 
 @app.route('/assets/new', methods=['GET', 'POST'])
 @login_required
@@ -132,7 +133,21 @@ def new_asset():
 @app.route('/users')
 @login_required
 def users():
-    return render_template('users.html')
+    if current_user.role != 'admin':
+        flash("Access denied: Admins only.")
+        return redirect(url_for('dashboard'))
+    all_users = User.query.all()
+    return render_template('users.html', users=all_users)
+
+@app.route('/users/<int:user_id>/assets')
+@login_required
+def user_assets(user_id):
+    if current_user.role != 'admin':
+        flash("Access denied: Admins only.")
+        return redirect(url_for('dashboard'))
+    user = User.query.get_or_404(user_id)
+    assets = Asset.query.filter_by(user_id=user_id).all()
+    return render_template('assets.html', assets=assets, user=user)
 
 @app.route('/logout')
 @login_required
