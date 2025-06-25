@@ -17,8 +17,11 @@
 
     <!-- Asset Section -->
     <div class="container mt-5">
-        <h2>Your Assets</h2>
-        <p>This table shows the assets registered under your account.</p>
+        {% if user %}
+    <h2>{{ user.first_name }} {{ user.last_name }}'s Assets</h2>
+{% else %}
+    <h2>Your Assets</h2>
+{% endif %}
 
         <!-- Asset Table -->
         <table class="table table-bordered table-striped mt-3">
