@@ -73,16 +73,18 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
+        site = request.form['site']  # this replaces 'username'
         email = request.form['email']
         password = request.form['password']
 
-        if User.query.filter((User.username == username) | (User.email == email)).first():
-            flash('Username or email already exists.')
+        # Check if user already exists
+        if User.query.filter((User.username == site) | (User.email == email)).first():
+            flash('Site location or email already exists.')
             return redirect(url_for('register'))
 
+        # Hash password and create user
         hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-        new_user = User(username=username, email=email, password_hash=hashed_pw)
+        new_user = User(username=site, email=email, password_hash=hashed_pw)
         db.session.add(new_user)
         db.session.commit()
 
@@ -90,6 +92,7 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
 
 @app.route('/dashboard')
 @login_required
