@@ -132,7 +132,11 @@ def new_asset():
 @app.route('/users')
 @login_required
 def users():
-    return render_template('users.html')
+    if current_user.role != "admin":
+        flash("You do not have permission to view this page.")
+        return redirect(url_for('dashboard'))
+    users = User.query.all()
+    return render_template('users.html', users=users)
 
 @app.route('/logout')
 @login_required
