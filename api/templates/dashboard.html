@@ -15,9 +15,19 @@
         </div>
     </nav>
 
+    {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info mt-3">
+      {% for message in messages %}
+        {{ message }}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
     <!-- Dashboard Content -->
     <div class="container mt-5">
-        <h2>Welcome back, {{ username if username else "User" }}</h2>
+        <h2>Welcome back, {{ full_name if full_name else "User" }}</h2>
         <p>This is your dashboard.</p>
 
         <div class="mt-4">

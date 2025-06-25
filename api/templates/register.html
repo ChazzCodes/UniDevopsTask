@@ -16,28 +16,37 @@
     </nav>
 
     <!-- Register Form -->
-    <div class="container mt-5" style="max-width: 500px;">
-        <h2 class="text-center mb-4">Create an Account</h2>
-        <form method="POST" action="/register">
+    <form method="POST">
+    <div class="mb-3">
+        <label for="first_name" class="form-label">First Name</label>
+        <input type="text" name="first_name" id="first_name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="last_name" class="form-label">Last Name</label>
+        <input type="text" name="last_name" id="last_name" class="form-control" required>
+    </div>
+
     <div class="mb-3">
         <label for="email" class="form-label">Email address</label>
-        <input type="email" name="email" id="email" class="form-control" placeholder="Enter email" required>
+        <input type="email" name="email" id="email" class="form-control" required>
     </div>
 
     <div class="mb-3">
         <label for="site" class="form-label">Site Location</label>
-        <input type="text" name="site" id="site" class="form-control" placeholder="e.g. Birmingham Depot" required>
+        <input type="text" name="site" id="site" class="form-control">
     </div>
 
     <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
+        <input type="password" name="password" id="password" class="form-control" required>
     </div>
 
     <div class="d-grid">
         <button type="submit" class="btn btn-primary">Register</button>
     </div>
 </form>
+
 
 
         <p class="text-center mt-3">Already have an account? <a href="/login">Login here</a></p>

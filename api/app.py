@@ -28,9 +28,11 @@ def load_user(user_id):
 # --- Models ---
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    site = db.Column(db.String(120), nullable=True)  # Optional, or remove if not needed
     role = db.Column(db.String(20), default='user', nullable=False)
     assets = db.relationship('Asset', backref='owner', lazy=True)
 
@@ -73,18 +75,25 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        site = request.form['site']  # this replaces 'username'
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
         email = request.form['email']
         password = request.form['password']
+        site = request.form.get('site')  # Optional
 
         # Check if user already exists
-        if User.query.filter((User.username == site) | (User.email == email)).first():
-            flash('Site location or email already exists.')
+        if User.query.filter_by(email=email).first():
+            flash('Email already exists.')
             return redirect(url_for('register'))
 
-        # Hash password and create user
         hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-        new_user = User(username=site, email=email, password_hash=hashed_pw)
+        new_user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password_hash=hashed_pw,
+            site=site
+        )
         db.session.add(new_user)
         db.session.commit()
 
@@ -93,11 +102,10 @@ def register():
 
     return render_template('register.html')
 
-
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', username=current_user.username, role=current_user.role)
+    return render_template('dashboard.html', full_name=f"{current_user.first_name} {current_user.last_name}", role=current_user.role)
 
 @app.route('/assets')
 @login_required
