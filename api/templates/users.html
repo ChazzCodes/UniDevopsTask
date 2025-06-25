@@ -1,0 +1,22 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Site</th>
+            <th>Assets</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.site }}</td>
+            <td>
+                <a href="{{ url_for('user_assets', user_id=user.id) }}" class="btn btn-sm btn-primary">View Assets</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
