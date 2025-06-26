@@ -170,6 +170,16 @@ def toggle_user_active(user_id):
     flash(f'User {user.first_name} {user.last_name} has been {"activated" if user.is_active else "deactivated"}.')
     return redirect(url_for('users'))
 
+@app.route('/admin/user/<int:user_id>/assets')
+@login_required
+def admin_view_user_assets(user_id):
+    if current_user.role != 'admin':
+        flash('Access denied.')
+        return redirect(url_for('users'))
+    user = User.query.get_or_404(user_id)
+    assets = user.assets  # or Asset.query.filter_by(user_id=user.id).all()
+    return render_template('assets.html', assets=assets, user=user)
+
 @app.route('/logout')
 @login_required
 def logout():
