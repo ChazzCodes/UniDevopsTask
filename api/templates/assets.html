@@ -17,44 +17,54 @@
 
     <!-- Asset Section -->
     <div class="container mt-5">
+    {% if user %}
+        <h2>{{ user.first_name }} {{ user.last_name }}'s Assets</h2>
+    {% else %}
         <h2>Your Assets</h2>
-        <p>This table shows the assets registered under your account.</p>
+    {% endif %}
 
-        <!-- Asset Table -->
-        <table class="table table-bordered table-striped mt-3">
-            <thead class="table-dark">
-                <tr>
-                    <th>Asset ID</th>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Assigned Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Dummy data for now -->
-                <tr>
-                    <td>ASSET001</td>
-                    <td>Lenovo ThinkPad X1</td>
-                    <td>Laptop</td>
-                    <td>Active</td>
-                    <td>2024-05-12</td>
-                </tr>
-                <tr>
-                    <td>ASSET002</td>
-                    <td>Dell Monitor 27"</td>
-                    <td>Monitor</td>
-                    <td>Inactive</td>
-                    <td>2023-11-01</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Add Asset Button -->
-        <div class="mt-4">
-            <a href="/assets/new" class="btn btn-success">Add New Asset</a>
+    {% if not user or user.id == current_user.id %}
+        <div class="mb-4">
+            <a href="{{ url_for('new_asset') }}" class="btn btn-success">Add New Asset</a>
         </div>
-    </div>
+    {% endif %}
 
-</body>
+    <!-- Asset Table -->
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Asset ID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Assigned Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if assets %}
+                {% for asset in assets %}
+                    <tr>
+                        <td>{{ asset.id }}</td>
+                        <td>{{ asset.name }}</td>
+                        <td>
+                          {% if asset.category %}
+                            {{ asset.category.name }}
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </td>
+                        <td>{{ asset.status }}</td>
+                        <td>{{ asset.created_at.strftime('%Y-%m-%d') if asset.created_at else "N/A" }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No assets assigned yet.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+</tbody>
 </html>
