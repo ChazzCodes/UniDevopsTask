@@ -53,7 +53,7 @@
                             N/A
                           {% endif %}
                         </td>
-                        <td>{{ asset.description or "N/A" }}</td>
+                        <td>{{ asset.status }}</td>
                         <td>{{ asset.created_at.strftime('%Y-%m-%d') if asset.created_at else "N/A" }}</td>
                     </tr>
                 {% endfor %}

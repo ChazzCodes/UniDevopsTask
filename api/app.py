@@ -44,7 +44,7 @@ class Category(db.Model):
 class Asset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(50), nullable=False)  # NEW COLUMN
     serial_number = db.Column(db.String(100), unique=True, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
@@ -124,11 +124,29 @@ def new_asset():
         status = request.form['status']
         assigned_date = request.form['date']
 
-        print("New Asset Submitted:", name, asset_type, status, assigned_date)
+        # Find or create the category
+        category = Category.query.filter_by(name=asset_type).first()
+        if not category:
+            category = Category(name=asset_type)
+            db.session.add(category)
+            db.session.commit()
 
+        # Create the asset
+        asset = Asset(
+            name=name,
+            status=status,  # Save status in the status column
+            user_id=current_user.id,
+            category_id=category.id,
+            created_at=datetime.strptime(assigned_date, '%Y-%m-%d')
+        )
+        db.session.add(asset)
+        db.session.commit()
+
+        flash("Asset added successfully!", "success")
         return redirect(url_for('assets'))
 
     return render_template('new_asset.html', today=today)
+
 
 @app.route('/users')
 @login_required
