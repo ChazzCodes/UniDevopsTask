@@ -32,8 +32,9 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
-    site = db.Column(db.String(120), nullable=True)  # Optional, or remove if not needed
+    site = db.Column(db.String(120), nullable=True)  
     role = db.Column(db.String(20), default='user', nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
     assets = db.relationship('Asset', backref='owner', lazy=True)
 
 class Category(db.Model):
@@ -157,15 +158,17 @@ def users():
     users = User.query.all()
     return render_template('users.html', users=users)
 
-@app.route('/admin/user/<int:user_id>/assets')
+@app.route('/admin/user/<int:user_id>/toggle_active', methods=['POST'])
 @login_required
-def admin_view_user_assets(user_id):
+def toggle_user_active(user_id):
     if current_user.role != 'admin':
         flash('Access denied.')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('users'))
     user = User.query.get_or_404(user_id)
-    assets = Asset.query.filter_by(user_id=user.id).all()
-    return render_template('assets.html', assets=assets, user=user)
+    user.is_active = not user.is_active
+    db.session.commit()
+    flash(f'User {user.first_name} {user.last_name} has been {"activated" if user.is_active else "deactivated"}.')
+    return redirect(url_for('users'))
 
 @app.route('/logout')
 @login_required

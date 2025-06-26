@@ -25,6 +25,8 @@
                     <th>Site</th>
                     <th>Role</th>
                     <th>Assets</th>
+                    <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,6 +38,24 @@
                     <td>{{ user.role|capitalize }}</td>
                     <td>
                         <a href="{{ url_for('admin_view_user_assets', user_id=user.id) }}" class="btn btn-sm btn-info">View Assets</a>
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                            <span class="text-success">Active</span>
+                        {% else %}
+                            <span class="text-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if current_user.role == 'admin' and current_user.id != user.id %}
+                        <form action="{{ url_for('toggle_user_active', user_id=user.id) }}" method="post" style="display:inline;">
+                            {% if user.is_active %}
+                                <button type="submit" class="btn btn-sm btn-warning">Deactivate</button>
+                            {% else %}
+                                <button type="submit" class="btn btn-sm btn-success">Activate</button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
